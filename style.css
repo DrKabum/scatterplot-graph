@@ -13,3 +13,10 @@ main {
 svg {
   border: 1px solid red;
 }
+
+.tooltip {
+  position: absolute;
+  padding: 1em 1.5em;
+  background-color: #dddddd;
+  border-radius: 10px;
+}

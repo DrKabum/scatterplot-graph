@@ -26,8 +26,6 @@ function drawScatterPlotChart(data) {
     item.Time = time
   })
 
-  console.log(data)
-
   // Make scales
   const xScale = d3
     .scaleLinear()
@@ -62,6 +60,14 @@ function drawScatterPlotChart(data) {
     .attr('x', -margin.top)
     .attr('dy', '.5em')
 
+  // make tooltip
+  const tooltip = d3
+    .select('body')
+    .append('div')
+    .attr('class', 'tooltip')
+    .attr('id', 'tooltip')
+    .style('opacity', 0)
+
   // make dots
   svgContainer
     .selectAll('circle')
@@ -74,13 +80,25 @@ function drawScatterPlotChart(data) {
     .attr('class', 'dot')
     .attr('data-xvalue', (data) => data.Year)
     .attr('data-yvalue', (data) => data.Time)
-    .attr('fill', (data) => color(data.Doping))
+    .attr('fill', (data) => color(data.Doping !== ''))
+    .on('mouseover', (event, d) => {
+      tooltip
+        .style('opacity', 1)
+        .attr('data-year', d.Year)
+        .html(
+          `Rider: ${d.Name} (time: ${d3.timeFormat('%M\'%S"')(d.Time)})<br />
+          ${d.Doping}`
+        )
+        .style('left', event.pageX + 30 + 'px')
+        .style('top', event.pageY + 'px')
+    })
+    .on('mouseout', () => tooltip.style('opacity', 0))
 
   // make legend
   const legContainer = svgContainer.append('g').attr('id', 'legend')
 
   const legend = legContainer
-    .select('#legend')
+    .selectAll('#legend')
     .data(color.domain())
     .enter()
     .append('g')
@@ -90,7 +108,7 @@ function drawScatterPlotChart(data) {
   // make legend squares
   legend
     .append('rect')
-    .attr('x', CHART_WIDTH - 18)
+    .attr('x', CHART_WIDTH - 18 - margin.right)
     .attr('width', 18)
     .attr('height', 18)
     .style('fill', color)
@@ -98,9 +116,10 @@ function drawScatterPlotChart(data) {
   // make legend text
   legend
     .append('text')
-    .attr('x', CHART_WIDTH - 24)
+    .attr('x', CHART_WIDTH - 24 - margin.right)
     .attr('y', 9)
     .attr('dy', '.35em')
+    .style('text-anchor', 'end')
     .text((d) => (d ? 'Riders with alleged doping' : 'No doping'))
 }
 
